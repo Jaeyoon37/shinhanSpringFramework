@@ -1,0 +1,7 @@
+eclipse.preferences.version=1
+encoding//src/main/java/com/shinhan/myapp/emp/EmpDAOJDBC.java=UTF-8
+encoding//src/main/java/com/shinhan/myapp/emp/EmpDAOMybatis.java=UTF-8
+encoding//src/main/java/com/shinhan/myapp/emp/EmpService.java=UTF-8
+encoding//src/main/java/com/shinhan/myapp/model/MemberDAO.java=UTF-8
+encoding//src/main/java/com/shinhan/myapp/model/MemberService.java=UTF-8
+encoding//src/main/java/net/starykids/util/DateUtil.java=UTF-8

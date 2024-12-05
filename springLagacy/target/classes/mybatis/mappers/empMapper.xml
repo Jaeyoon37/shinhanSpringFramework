@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shinhan.emp">
+
+	<select id="selectAll" resultType="empVO">
+		select * from employees order by 1
+	</select>
+	
+	<!-- 여러 부서들의 직원 정보 조회
+		where department_id in (10,20,30) -->
+	<select id="selectByArray" parameterType="java.util.List" resultType="empVO">
+		select *
+		from employees
+		where department_id
+		in
+		<foreach collection="list" item="item" open="(" close=")" separator=",">
+			#{item}
+		</foreach>
+		order by 1
+
+	</select>
+	
+	<select id="selectJoin2" resultType="map" parameterType="string">
+		select employee_id, first_name, salary,
+				department_name, city, country_name, job_title
+        from employees
+        join departments using(department_id)
+        join locations using(location_id)
+        join countries USING(country_id)
+        join jobs using (job_id)
+        <if test="aa!='-1'">
+	        where job_id = #{aa}
+        </if>
+	</select>
+	
+	<select id="selectAllJob" resultType="jobVO">
+		select * from jobs
+	</select>
+	
+	<select id="selectJoin" parameterType="string" resultType="com.shinhan.myapp.emp.EmpJoinDTO">
+		select employee_id, first_name, salary,
+				department_name, city, country_name, job_title
+        from employees
+        join departments using(department_id)
+        join locations using(location_id)
+        join countries USING (country_id)
+        join jobs using (job_id)
+        <if test="aa!='-1'">
+	        where  job_id = #{aa}
+        </if>
+	</select>
+
+	<select id="selectByDept" parameterType="int" resultType="empVO">
+		select * from employees
+		<if test="aa != -1">
+			where department_id = #{aa}
+		</if>
+	</select>
+
+	<select id="selectByJob" parameterType="string" resultType="empVO">
+		select *
+		from employees
+		<if test = "aa != '-1'">
+			where job_id = #{aa}
+		</if>
+	</select>
+	
+	<select id="selectBySalary" parameterType="double" resultType="empVO">
+		select *
+		from employees
+		where salary >= #{sal}
+	</select>
+	
+	<!-- map을 파라미터로 가져오기
+		map.put("deptid", 값) → mybatis 가 map.get(deptid)로 읽음
+		map.put("jobid", 값)
+		map.put("salary", 값)
+		map.put("hdate", 값) -->
+		
+	<!-- 동적 SQL문 만들기 -->
+	<!-- deptid 가 -1이면, 모든 부서, jobid가 -1이면 모든 job -->
+	<select id="selectByCondition2" 
+	resultType="empVO" parameterType="map">
+		select *
+		from employees where salary >= #{salary}
+		<if test="deptid != -1">
+			and department_id = #{deptid}
+		</if>
+		<if test="jobid != '-1'">
+			and job_id = #{jobid}
+		</if>
+		<if test="hdate != '1900-01-01'">
+			and hire_date >= #{hdate}
+		</if>
+	</select>	
+		
+	<select id="selectByCondition" 
+	resultType="empVO" parameterType="map">
+		select *
+		from employees
+		where (-1 = #{deptid} or department_id = #{deptid})
+		and ('-1' = #{jobid} or job_id = #{jobid})
+		and salary >= #{salary} and  hire_date >= #{hdate}
+	</select>
+	
+	<!-- employees 테이블에서 select 한 칼럼의 정보를
+		empVO 를 기본 생성자로 생서하고 setter로 넣는다. -->
+	<select id="selectById" parameterType="int" resultType="empVO">
+		select *
+		from employees
+		where employee_id = #{aa}
+	</select>
+	
+	<insert id="insert" parameterType="empVO">
+		insert into employees
+			(employee_id, first_name, last_name, email,
+			phone_number, hire_date, job_id, salary,
+			commission_pct, manager_id, department_id)
+		values (#{employee_id}, #{first_name},
+			#{last_name}, #{email}, #{phone_number},
+			#{hire_date}, #{job_id}, #{salary},
+			#{commission_pct},
+			
+			<!-- 매니저없음 -->
+			<if test="manager_id == -1">
+				null,
+			</if>
+			<if test="manager_id != -1">
+				#{manager_id},
+			</if>
+			
+			<!-- 부서없음 -->
+			<if test="department_id == -1">
+				null <!-- 부서가 없으면 jsp페이지에선 -1이 옴. 부서없음. null로 입력 -->
+			</if>
+			<if test="department_id != -1">
+				#{department_id}
+			</if>
+			)
+	</insert>
+	<!-- empVO에 전달된 정보를 getter로 읽음. #{first_name} → getFirst_name() -->
+	<update id="update" parameterType="empVO">
+		 update employees set
+		 first_name=#{first_name},
+		 last_name=#{last_name},
+		 email=#{email},
+		 phone_number=#{phone_number},
+		 hire_date=#{hire_date},
+		 job_id=#{job_id},
+		 salary=#{salary},
+		 commission_pct=#{commission_pct},
+		 manager_id=#{manager_id},
+		 department_id=#{department_id}
+		 where employee_id=#{employee_id}
+	</update>
+	
+	<delete id="delete" parameterType="int">
+		delete from employees where EMPLOYEE_ID = #{empid}
+	</delete>
+	
+</mapper>

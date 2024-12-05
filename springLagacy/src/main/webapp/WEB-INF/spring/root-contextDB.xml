@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+		http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+
+	<!-- base-package에 있는 것 전부 스캔 (콤마(,)로 여러 개 가능) -->
+	<context:component-scan
+		base-package="com.shinhan.myapp, net.starykids"></context:component-scan>
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="location"
+			value="/WEB-INF/spring/appServlet/oracleDB.properties" />
+		<property name="fileEncoding" value="UTF-8" />
+	</bean>
+
+	<!-- sqlSession을 생성해준다. (dataSource, configLocation, mapperLocations 사용 -->
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="configLocation"
+			value="classpath:mybatis/sqlMapConfig.xml" />
+		<property name="mapperLocations"
+			value="classpath:mybatis/mappers/*.xml" />
+	</bean>
+
+	<!-- sql 문 실행하여 DB 객체와 자바객체를 Mapping 해준다. -->
+	<bean id="sqlSession"
+		class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory"></constructor-arg>
+	</bean>
+
+	<!-- 3. JNDI로 Connection Pooling 사용하기 context.xml 에 설정이 있음. Tomcat이 Connection 
+		Pooling 관리 -->
+
+	<!-- <jee:jndi-lookup id="dataSource" jndi-name="jdbc/myoracle" resource-ref="true" 
+		/> -->
+
+	
+	<bean id="dataSource"
+		class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<constructor-arg ref="dataSourceOriginal" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE"></property>
+				<property name="sqlPrefix" value="[SQL문장] "></property>
+			</bean>
+		</property>
+	</bean>
+	<!-- 
+		1. 사용자가 browser 요청 →
+		2. Filter → Front Controller →
+		3. Service →
+		4. DAOMybatis →
+		5. sqlSession →
+		6. sqlSeseion Factory →
+		7. dataSource (dataSourceOriginal)  →
+		8. dataSource ()  →
+	
+	 -->
+	<!-- Connection Pooling 이용하기 oracleDB.properties에 변수있음. -->
+	<bean id="dataSourceOriginal"
+		class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="${driverClassName}" />
+		<property name="url" value="${url}" />
+		<property name="username" value="${username}" />
+		<property name="password" value="${password}" />
+	</bean>
+
+
+	<!-- DriverManager 이용하기 <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"> 
+		<property name="driverClassName" value="${driverClassName}" /> <property 
+		name="url" value="${url}" /> <property name="username" value="${username}" 
+		/> <property name="password" value="${password}" /> </bean> -->
+
+
+</beans>
