@@ -33,7 +33,7 @@ public class HomeController {
 		
 		//request.setAttribute()∂˚ ∞∞¿Ω.
 		model.addAttribute("serverTime", formattedDate );
-		model.addAttribute("myname", "¿Á¿±¿Ã");
+		model.addAttribute("myname", "¿Á¿±");
 		
 		return "home";
 	}
